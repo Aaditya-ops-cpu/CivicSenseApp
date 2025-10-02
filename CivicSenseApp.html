@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Civic Sense Guide & Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --background: whitesmoke;
+            --card: white;
+            --primary: indigo;
+            --primary-hover: darkblue;
+            --secondary: ghostwhite;
+            --secondary-hover: lightgray;
+            --text-primary: darkslategray;
+            --text-secondary: slategray;
+            --border: lightgray;
+            --correct-bg: honeydew;
+            --correct-border: mediumseagreen;
+            --correct-text: darkgreen;
+            --incorrect-bg: mistyrose;
+            --incorrect-border: lightcoral;
+            --incorrect-text: darkred;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background);
+            color: var(--text-primary);
+        }
+        .card {
+            background-color: var(--card);
+            border-radius: 1.5rem;
+            padding: 2.5rem;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+            max-width: 900px;
+            width: 95%;
+            margin: 2.5rem auto;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 0.75rem 1.75rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            border: 1px solid transparent;
+            user-select: none;
+        }
+        .btn-primary { background-color: var(--primary); color: white; }
+        .btn-primary:hover { background-color: var(--primary-hover); }
+        .btn-secondary { background-color: var(--secondary); color: var(--text-primary); border: 1px solid var(--border); }
+        .btn-secondary:hover { background-color: var(--secondary-hover); }
+        .option-btn {
+            display: block; width: 100%; border: 1px solid var(--border); color: var(--text-primary);
+            background-color: var(--card); text-align: left; padding: 0.875rem 1.25rem; border-radius: 0.75rem;
+        }
+        .option-btn:hover { background-color: var(--secondary); border-color: var(--primary); }
+        .option-btn.correct { background-color: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-text); font-weight: 700; }
+        .option-btn.incorrect { background-color: var(--incorrect-bg); border-color: var(--incorrect-border); color: var(--incorrect-text); font-weight: 700; }
+        
+        .screen { display: none; animation: fadeIn 0.5s; }
+        .screen.active { display: block; }
+        
+        .progress-bar-container { width: 100%; background-color: var(--secondary); border-radius: 9999px; height: 0.5rem; overflow: hidden; }
+        .progress-bar { background-color: var(--primary); height: 100%; border-radius: 9999px; transition: width 0.4s ease-in-out; }
+        
+        .prose h3 { font-size: 1.5rem; font-weight: 700; margin-top: 0; margin-bottom: 1rem; }
+        .prose p, .prose li { color: var(--text-secondary); line-height: 1.75; margin-bottom: 1rem; }
+        .prose ul { list-style-type: disc; padding-left: 1.5rem; }
+        .prose strong { color: var(--text-primary); font-weight: 600; }
+
+        .country-card {
+            border: 1px solid var(--border); border-radius: 1rem; padding: 1.5rem;
+            text-align: center; cursor: pointer; transition: all 0.2s ease-in-out;
+            background-color: var(--card);
+        }
+        .country-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.07); border-color: var(--primary); }
+        .country-card .flag-icon { width: 64px; height: 48px; margin: 0 auto 1rem; border-radius: 0.25rem; box-shadow: 0 0 0 1px rgba(0,0,0,0.05); }
+        .country-card span { font-weight: 600; font-size: 1.125rem; }
+
+        .nav-pane { max-height: 400px; overflow-y: auto; }
+        .nav-pane button {
+            display: block; width: 100%; text-align: left; padding: 0.75rem 1rem;
+            border-radius: 0.5rem; font-weight: 500; color: var(--text-secondary);
+            border-left: 3px solid transparent;
+        }
+        .nav-pane button.active {
+            background-color: var(--secondary); color: var(--primary);
+            font-weight: 700; border-left: 3px solid var(--primary);
+        }
+        .nav-pane button:hover:not(.active) { background-color: var(--secondary); }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-600"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="M12 2a10 10 0 0 0-3.465 19.465A10 10 0 0 1 12 2z"></path></svg>
+                <h1 class="text-2xl font-bold text-gray-800">Global Citizen Guide</h1>
+            </div>
+            <button id="home-btn" class="btn btn-secondary hidden">Home</button>
+        </div>
+    </header>
+
+    <main id="app-container" class="w-full">
+        <div id="home-screen" class="screen active">
+            <div class="min-h-[calc(100vh-65px)] flex items-center bg-gradient-to-br from-indigo-50 via-white to-sky-100">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+                    <div class="grid md:grid-cols-2 gap-12 items-center">
+                        <div class="text-center md:text-left">
+                            <h2 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 leading-tight">
+                                Become a
+                                <span class="bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-sky-500">
+                                    Confident Global Citizen
+                                </span>
+                            </h2>
+                            <p class="mt-6 text-lg text-gray-600 max-w-xl mx-auto md:mx-0">
+                                Navigate the nuances of international customs with ease. Our in-depth guides and quizzes prepare you for a respectful and enriching journey.
+                            </p>
+                            <div class="mt-10">
+                                <button id="start-btn" class="btn btn-primary text-lg px-8 py-3 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
+                                    Start Exploring
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="hidden md:block">
+                            <svg viewBox="0 0 500 400" xmlns="http://www.w3.org/2000/svg">
+                                <defs>
+                                    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" style="stop-color:rgb(129, 140, 248);stop-opacity:1" />
+                                        <stop offset="100%" style="stop-color:rgb(56, 189, 248);stop-opacity:1" />
+                                    </linearGradient>
+                                </defs>
+                                <circle cx="250" cy="200" r="180" fill="url(#grad1)" opacity="0.1"/>
+                                <circle cx="250" cy="200" r="190" stroke="url(#grad1)" stroke-width="1" fill="none" opacity="0.2"/>
+                                <path d="M 250 350 L 250 320 M 250 320 L 280 150 L 220 150 L 250 320 M 230 250 H 270 M 235 200 H 265" stroke="#4338ca" stroke-width="4" fill="none" stroke-linecap="round"/>
+                                <path d="M 150 350 Q 180 300 210 350" stroke="#6d28d9" stroke-width="4" fill="none" stroke-linecap="round"/>
+                                <path d="M 155 350 V 330" stroke="#6d28d9" stroke-width="4" fill="none" stroke-linecap="round"/>
+                                <path d="M 205 350 V 330" stroke="#6d28d9" stroke-width="4" fill="none" stroke-linecap="round"/>
+                                <path d="M 330 250 L 380 250 Q 390 240 380 230 L 330 230 Q 320 240 330 250 Z" fill="#c026d3" opacity="0.7"/>
+                                <rect x="345" y="250" width="20" height="30" fill="#c026d3" opacity="0.7"/>
+                                <path d="M 350 150 L 360 120 L 370 150 Z" fill="#059669" opacity="0.8"/>
+                                <rect x="355" y="150" width="10" height="30" fill="#059669" opacity="0.8"/>
+                                <path d="M 120 180 L 140 180 L 130 250 Z" fill="#f59e0b" opacity="0.7"/>
+                                <path d="M 110 170 Q 130 140 150 170" stroke="#f59e0b" stroke-width="4" fill="none" stroke-linecap="round"/>
+                                <circle cx="100" cy="100" r="10" fill="#2563eb" opacity="0.5"/>
+                                <circle cx="400" cy="300" r="15" fill="#db2777" opacity="0.5"/>
+                                <path d="M 80 300 C 100 280, 120 280, 140 300" stroke="#0ea5e9" stroke-width="2" fill="none" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="country-selection-screen" class="screen">
+            <div class="card text-center">
+                <h2 class="text-3xl font-bold text-gray-900 mb-2">Choose a Country</h2>
+                <p class="text-gray-600 mb-8">Select a country to learn about its culture and civic sense.</p>
+                <div id="country-buttons" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                </div>
+            </div>
+        </div>
+
+        <div id="guidance-screen" class="screen">
+            <div class="card">
+                <h2 id="guidance-title" class="text-4xl font-bold text-gray-900 mb-6 text-center border-b pb-4"></h2>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                    <div id="guidance-nav" class="nav-pane md:col-span-1 border-r pr-4">
+                    </div>
+                    <div id="guidance-content" class="prose max-w-none md:col-span-3">
+                    </div>
+                </div>
+                <div class="mt-10 pt-6 border-t flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <button id="back-to-countries-btn" class="btn btn-secondary">← Back to Countries</button>
+                    <button id="start-country-quiz-btn" class="btn btn-primary">Take the Quiz →</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="quiz-screen" class="screen">
+             <div class="card">
+                <h2 id="quiz-title" class="text-2xl font-bold text-center text-gray-800 mb-6"></h2>
+                <div class="flex justify-between items-center mb-4">
+                    <p class="text-sm font-semibold text-gray-600">Question <span id="question-number"></span>/15</p>
+                    <p class="text-sm font-semibold text-indigo-600">Score: <span id="score">0</span></p>
+                </div>
+                <div class="progress-bar-container mb-6">
+                    <div id="progress-bar" class="progress-bar" style="width: 0%;"></div>
+                </div>
+                <h3 id="question-text" class="text-xl font-semibold text-gray-900 mb-6 min-h-[5rem]"></h3>
+                <div id="options-container" class="space-y-3"></div>
+                <p id="feedback-text" class="text-center mt-4 font-medium h-6"></p>
+                <div class="flex justify-end mt-6">
+                    <button id="next-question-btn" class="btn btn-primary hidden">Next →</button>
+                </div>
+            </div>
+        </div>
+        <div id="results-screen" class="screen">
+            <div class="card text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Quiz Complete!</h2>
+                <p id="results-quiz-title" class="text-lg text-gray-600 mb-6"></p>
+                <p class="text-6xl font-bold text-indigo-600 mb-4" id="final-score"></p>
+                <p class="text-xl font-medium text-gray-700 mb-8" id="result-message"></p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button id="restart-quiz-btn" class="btn btn-primary">Try This Quiz Again</button>
+                    <button id="back-to-selection-btn" class="btn btn-secondary">Choose Another Country</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const countryLogos = {
+                'France': `<img src="https://flagcdn.com/fr.svg" alt="Flag of France" class="flag-icon">`,
+                'Spain': `<img src="https://flagcdn.com/es.svg" alt="Flag of Spain" class="flag-icon">`,
+                'United States': `<img src="https://flagcdn.com/us.svg" alt="Flag of United States" class="flag-icon">`,
+                'China': `<img src="https://flagcdn.com/cn.svg" alt="Flag of China" class="flag-icon">`,
+                'Italy': `<img src="https://flagcdn.com/it.svg" alt="Flag of Italy" class="flag-icon">`,
+                'Turkey': `<img src="https://flagcdn.com/tr.svg" alt="Flag of Turkey" class="flag-icon">`,
+                'Australia': `<img src="https://flagcdn.com/au.svg" alt="Flag of Australia" class="flag-icon">`,
+                'United Kingdom': `<img src="https://flagcdn.com/gb.svg" alt="Flag of United Kingdom" class="flag-icon">`
+            };
+            const detailedCivicData = {
+                'France': {
+                    title: 'Civic Sense in France',
+                    content: {
+                        'Greetings & Formality': `<p>Politeness is the absolute cornerstone of French social interaction. It is not merely a pleasantry but a required social lubricant. <strong>Always greet and say goodbye.</strong> A simple "Bonjour" (Good day) upon entering any establishment—a shop, café, doctor's waiting room, or even an elevator—is essential. Failing to do so is seen as extremely rude. When leaving, always say "Au revoir" (Goodbye). After dusk, "Bonsoir" (Good evening) replaces "Bonjour".</p><p>Addressing people correctly is also vital. Use "Madame" for women, "Monsieur" for men. "Mademoiselle" for young women is becoming less common and can be seen as dated or even slightly sexist; "Madame" is a safer default. The distinction between the formal "vous" (you) and informal "tu" (you) is critical. As a visitor, <strong>always default to "vous"</strong> with strangers, anyone older than you, and in all professional or commercial settings. Using "tu" without being invited to is overly familiar and can cause offense. You will know it's okay to use "tu" if a French person starts using it with you, or explicitly says "on peut se tutoyer" (we can use "tu" with each other).</p>`,
+                        'Dining Etiquette': `<p>Meals are cherished, often lengthy, social rituals. When dining at someone's home, it's polite to arrive about 15 minutes late. Punctuality is for business, not social dinners. When dining in a restaurant, wait for your host or the eldest person to say "Bon appétit" before you begin eating. It's customary to <strong>keep both hands visible on the table,</strong> with wrists resting on the edge—never in your lap. Bread is not served with a side plate; you place it directly on the tablecloth next to your plate. Use it to accompany your food, but do not use it to mop up sauces until the very end of the dish, if at all. When you finish, place your knife and fork parallel on the plate at the 4 o'clock position.</p><p>Tipping is not obligatory in the same way as in the US. A service charge of 15% ("service compris") is legally included in the bill. However, for good service, it is customary to leave a small extra amount (a few euros in coins) on the table. This is called a "pourboire" (literally, "for a drink").</p>`,
+                        'Public Conduct': `<p>The French generally value discretion and calm in public spaces. <strong>Speaking loudly on mobile phones,</strong> especially in the confined spaces of a bus or the Métro, is considered very rude. If you must take a call, be brief and quiet. Similarly, loud conversations among your group will attract negative attention. Maintain a low volume in museums, churches, and restaurants. Queuing is expected and respected; do not push or cut in line. On escalators, particularly in the Paris Métro, it is a strict and non-negotiable rule to <strong>stand on the right</strong> to allow those in a hurry to walk on the left. Blocking the left side will earn you audible sighs and pointed comments.</p>`,
+                        'Dress Code & Appearance': `<p>The French, particularly in cities like Paris, place a high value on appearance. This doesn't necessarily mean expensive clothes, but rather being well-put-together, neat, and stylish. For evening meals at a nice restaurant, smart casual is the minimum. Avoid wearing athletic wear, shorts, or flip-flops for anything other than their intended purpose (sports or the beach). Even for casual sightseeing, opting for smart trousers or a skirt over jogging bottoms will help you blend in more. When visiting religious buildings, ensure your shoulders and knees are covered.</p>`,
+                        'Business Etiquette': `<p>Punctuality is absolutely expected in business settings; being late is a sign of disrespect. Handshakes are the standard greeting for both men and women—a quick, firm grip. Business cards are exchanged after the initial introductions. The French appreciate well-reasoned, logical arguments and intellectual debate. Business meetings can be more about discussion and exchanging viewpoints than immediate decision-making. Decisions are often made by the highest-ranking person in a hierarchical structure, so be patient. Building a personal relationship is often a prerequisite for doing business.</p>`,
+                        'Cultural Context': `<ul><li><strong>Laïcité (Secularism):</strong> France has a very strict form of secularism. Religion is considered a private matter. Avoid wearing conspicuous religious symbols in government buildings and public schools.</li><li><strong>Strikes (Grèves):</strong> Strikes are a common part of French life and are seen as a legitimate way to express dissent. Be prepared for potential disruptions to transport and services, and check news updates if you are traveling during a strike period.</li><li><strong>Helpful Phrase:</strong> "Je ne comprends pas" (I don't understand). It's better to admit you don't understand than to nod along incorrectly.</li></ul>`,
+                    }
+                },
+                'Spain': {
+                    title: 'Civic Sense in Spain',
+                    content: {
+                        'Social Culture': `<p>Spain boasts a vibrant, sociable, and often loud culture. Don't mistake passionate, expressive conversations for arguments; animated discussion with gestures is the norm. Greetings are warm and tactile. Friends and family often exchange <strong>"dos besos" (two kisses), starting with the right cheek then the left.</strong> In professional or new settings, a firm handshake is standard. It's polite to say "Hola" upon meeting, and "Adiós" or the more common "Hasta luego" (see you later) when leaving. In shops, a simple "Buenos días" (Good morning) or "Buenas tardes" (Good afternoon) is expected.</p>`,
+                        'Meal Times & Siesta': `<p>Spanish schedules can be a shock to visitors. <strong>Lunch ("la comida") is the main meal of the day,</strong> typically a multi-course affair eaten between 2:00 PM and 4:00 PM. Dinner ("la cena") is much lighter and served very late, usually after 9:00 PM or even 10:00 PM. Many businesses, especially smaller, family-run shops outside major tourist centers, close for a <strong>"siesta"</strong> in the afternoon (approximately 2-5 PM). While this is less common in large corporations and big cities like Madrid and Barcelona, the rhythm of life still slows down significantly in the afternoon.</p>`,
+                        'Tapas & Dining': `<p>Tapas culture is a core part of Spanish social life. It's not just about food; it's a social event. It's common to stand at the bar, have one or two tapas and a drink, and then move on to the next bar ("ir de tapas"). Tipping is not as ingrained as in other countries. It is common to round up the bill or leave a small amount of change (a euro or two) for good service, but a 15-20% tip is not expected. Don't rush your meals. The "sobremesa," or time spent talking at the table after a meal has finished, is a cherished tradition and can last for hours.</p>`,
+                        'Public Behavior': `<p>Spaniards are generally relaxed about noise, and public life often unfolds in the streets, squares, and cafes. Punctuality is flexible for social engagements; arriving 15-20 minutes late for a dinner party is normal and expected. However, for official appointments, transport, or business meetings, you should be on time. It's considered rude to be barefoot anywhere other than a beach or pool. Yawning or stretching in public should be done discreetly.</p>`,
+                        'Regional Identity': `<p>Spain is a country of fiercely proud autonomous regions. Many Spaniards identify more with their region (e.g., Catalonia, Andalusia, Basque Country) than with Spain as a whole. Be sensitive to this. In regions like Catalonia and the Basque Country, you will see signs in their own languages (Catalan and Euskara) as well as Spanish. Using a few words in the local language can be a very appreciated gesture. Avoid discussing sensitive topics like the Franco regime or regional separatism unless you are very familiar with the person and the context.</p>`,
+                        'Cultural Tips': `<ul><li>Avoid stereotypes about bullfighting and flamenco; not all Spaniards identify with them and they can be sensitive topics.</li><li>Be patient. The pace of life, especially in the south, is more relaxed. The concept of "mañana" doesn't always mean tomorrow, but rather "not today."</li><li><strong>Helpful Phrase:</strong> "No pasa nada" (It's okay/No problem). This phrase embodies the relaxed Spanish attitude to life.</li></ul>`,
+                    }
+                },
+                'United States': {
+                    title: 'Civic Sense in the USA',
+                    content: {
+                        'Tipping Culture': `<p>Tipping is a fundamental and effectively non-optional aspect of American service culture. The federal minimum wage for tipped workers is extremely low, so they rely on tips for the majority of their income. <strong>A standard tip for good service in a restaurant is 15-20%</strong> of the pre-tax bill. For exceptional service, 25% is not uncommon. Less than 15% implies you were unhappy with the service. You should also tip bartenders ($1-2 per drink), taxi/rideshare drivers (10-15%), hotel staff (bellhops, valets), hairdressers, and tour guides. Not tipping is a serious social blunder.</p>`,
+                        'Communication & Space': `<p>Americans generally value personal space and may feel uncomfortable if a stranger stands too close during a conversation (<strong>an arm's length is a good guide</strong>). Communication tends to be direct and explicit. "How are you?" is a common greeting, not a genuine inquiry into your well-being; a simple "Good, thanks, how are you?" is the expected response. Small talk with strangers—cashiers, people in a queue, servers—is very common and considered friendly. Americans are also generally more open about sharing personal stories than people in many other cultures, but avoid sensitive topics like politics, religion, and salary with new acquaintances.</p>`,
+                        'Public Order & Punctuality': `<p><strong>Queuing (or "standing in line") is strictly observed.</strong> Cutting in line is considered extremely rude and will likely be called out by others. Punctuality is very important in both business and social settings. Being on time for appointments and meetings is expected. If you are going to be more than 5-10 minutes late, it is polite to call or text to notify the person you are meeting. Being "fashionably late" is not a widely accepted concept.</p>`,
+                        'Driving Etiquette': `<p>The US is a car-centric country. Rules of the road are generally followed. The horn is used almost exclusively for warnings, not for greetings or expressing minor frustration. "Tailgating" (driving too close to the car in front) is considered aggressive and dangerous. It's common to give a brief, friendly wave as a "thank you" if another driver lets you merge into traffic.</p>`,
+                        'Business Etiquette': `<p>A firm handshake with direct eye contact is the standard greeting. Business culture is often fast-paced, individualistic, and results-oriented. Time is considered a valuable commodity, so meetings tend to be efficient and stick to an agenda. Dress code can vary significantly by industry and region, from the formal suits of Wall Street to the very casual attire of Silicon Valley tech companies.</p>`,
+                        'Cultural Context': `<ul><li><strong>Individualism:</strong> The culture highly values independence and self-reliance.</li><li><strong>Consumerism:</strong> The price you see on a sales tag is almost never the final price; sales tax is added at the register. Customer service is often very proactive, and returning items to stores is usually a straightforward process.</li><li><strong>Helpful Phrase:</strong> "Could you tell me where the restroom is?" ("Restroom" or "bathroom" are the most common terms, not "toilet" or "W.C.").</li></ul>`,
+                    }
+                },
+                 'China': {
+                    title: 'Civic Sense in China',
+                    content: {
+                        '"Face" & Harmony': `<p>Understanding "face" (Mianzi) — a complex concept of honor, reputation, and respect — is crucial. You must <strong>avoid causing someone public embarrassment,</strong> contradicting them openly, or criticizing them in front of others, especially a superior. Giving "face" involves showing respect, offering compliments (which may be deflected out of modesty), and acknowledging someone's status. This principle governs social interaction, emphasizing social harmony and avoiding direct conflict. Instead of a direct "no," you are more likely to hear an indirect response like "I'll see" or "it might be difficult."</p>`,
+                        'Dining & Chopsticks': `<p>Meals are often communal, with shared dishes placed on a lazy Susan. Your host will likely order for the table and will serve you the best pieces of food to show honor. It's polite to try a little of everything. <strong>Never stick your chopsticks upright in your bowl of rice,</strong> as this resembles incense sticks at a funeral and is a major taboo. Do not use your chopsticks to point at people or dishes. When not using them, rest them on the provided chopstick rest or horizontally on the side of your bowl. To thank someone for pouring you tea, you can gently tap your index and middle fingers on the table.</p>`,
+                        'Gifts & Business Cards': `<p>When giving or receiving a gift, business card, or even money, <strong>always use both hands</strong> to show respect and importance. Gifts are often refused a couple of times out of politeness before being accepted; you should persist gently. It is customary not to open a gift in front of the giver. When receiving a business card, take a moment to read it carefully before putting it away in a card case or wallet; do not just stuff it in your pocket or write on it.</p>`,
+                        'Social Norms & Hierarchy': `<p>Chinese society is hierarchical, and respect for age and seniority is paramount. The oldest person is served first, enters a room first, and is deferred to in conversation. Personal space is less of a concept than in the West, so be prepared for crowded conditions in public. Punctuality is highly valued; being early for appointments is a sign of respect.</p>`,
+                        'Digital Etiquette': `<p>China is a highly digital and mobile-first society. WeChat is ubiquitous for everything from messaging and social media to payments and official business. Exchanging WeChat contacts is the modern equivalent of exchanging business cards. Mobile payments (WeChat Pay or Alipay) are the norm, and cash is becoming increasingly rare in major cities.</p>`,
+                        'Cultural Context': `<ul><li>The number 4 is considered very unlucky as it sounds like the word for "death." Conversely, 8 is a very lucky number associated with wealth.</li><li>Be mindful of your feet; do not point them at people or use them to move objects.</li><li><strong>Helpful Phrase:</strong> "Mǎidān" (My-dahn) - "The bill, please." Used in restaurants.</li></ul>`,
+                    }
+                },
+                'Italy': {
+                    title: 'Civic Sense in Italy',
+                    content: {
+                        'Coffee Culture': `<p>Coffee is an art form and a daily ritual with strict, unwritten rules. An espresso, simply called "un caffè," is the standard. <strong>Cappuccinos and other milky coffees are strictly for the morning</strong> and are never ordered after 11 AM, and certainly not after a meal (it's believed the milk hinders digestion). It's common practice to order and drink your coffee standing at the bar ("al banco"), which is quicker and often cheaper than sitting at a table ("al tavolo"), where a service charge is added.</p>`,
+                        'Appearance & "La Bella Figura"': `<p>The concept of "la bella figura" (making a beautiful figure) is very important. It's about presenting yourself with style, confidence, and grace in all situations. This is reflected in the way Italians dress; they are often very fashion-conscious. Even for a casual walk, people are well-dressed. Avoid overly casual or sloppy attire like gym clothes or flip-flops in cities and towns. When visiting churches and religious sites, it is mandatory to <strong>dress modestly. This means covering your shoulders and knees.</strong></p>`,
+                        'Punctuality & Dining': `<p>In social situations, particularly in the south, punctuality is relaxed. Being "fashionably late" (15-30 minutes) for a dinner invitation is common. However, for business meetings or formal appointments, you should be punctual. Meals are structured, often with multiple courses (antipasto, primo, secondo, dolce). <strong>Do not ask for extra cheese on a seafood pasta dish,</strong> as this is considered a culinary sin. Also, do not cut spaghetti with a knife; learn to twirl it with a fork. Salads are typically eaten after the main course.</p>`,
+                        'Public Behavior': `<p>The "passeggiata," or leisurely evening stroll, is a beloved tradition, especially on weekends. It's a time for socializing and being seen. When speaking, Italians use a lot of hand gestures which are an integral part of communication. Personal space is closer than in many other cultures. The concept of queuing is somewhat more flexible than in Northern Europe; be prepared to hold your ground politely but firmly.</p>`,
+                        'Regionalism & Family': `<p>Family is the center of Italian society. Strong loyalty is to the family first and foremost. There is also a powerful sense of regional pride, known as "campanilismo" (loyalty to one's own bell tower). An Italian may identify as Sicilian or Tuscan before identifying as Italian. Be aware of the distinct cultural differences and friendly rivalries between regions, particularly between the north and the south.</p>`,
+                        'Cultural Tips': `<ul><li>Don't expect shops to be open in the middle of the day. The "riposo" (similar to a siesta) is common from around 1 PM to 4 PM.</li><li>Never touch produce at a market stall with your bare hands; use the provided plastic gloves or ask the vendor for assistance.</li><li><strong>Helpful Phrase:</strong> "Posso?" (May I?) - A polite way to ask for permission before taking a photo of someone or entering a small shop.</li></ul>`,
+                    }
+                },
+                'Turkey': {
+                    title: 'Civic Sense in Turkey',
+                    content: {
+                        'Hospitality & Respect': `<p>Turkish culture is renowned for its exceptional hospitality ("misafirperverlik"). It's common to be offered tea ("çay") or coffee by shopkeepers and locals as a gesture of friendship, and it's polite to accept, even if just for a few minutes of conversation. <strong>Respect for elders is deeply ingrained.</strong> When greeting an elder, it is a traditional sign of respect to kiss their right hand and then bring it to your forehead. Address people older than you with formal titles like "abi" (older brother), "abla" (older sister), "amca" (uncle), or "teyze" (aunt).</p>`,
+                        'Visiting Mosques & Homes': `<p>When entering a mosque, you must <strong>remove your shoes.</strong> Dress modestly: men should wear long trousers, and women should cover their heads, shoulders, arms, and legs. Most major mosques provide scarves for visitors. Visit outside of the five daily prayer times, and behave quietly and respectfully inside. Similarly, you should always remove your shoes when entering a Turkish home.</p>`,
+                        'Gestures & Communication': `<p>Certain gestures can be misinterpreted. Making an "OK" sign with your thumb and forefinger can be considered a grave insult. To say "no," you don't need to shake your head; a <strong>single upward tilt of the head, often accompanied by a "tsk" sound,</strong> is sufficient. Pointing directly at someone with your finger is considered rude. To beckon someone, you use a downward scooping motion with your hand, palm down.</p>`,
+                        'Bargaining & Shopping': `<p>Bargaining ("pazarlık") is expected and is a normal part of the shopping experience in markets and bazaars like the Grand Bazaar in Istanbul. It should be done in a friendly, respectful manner. The first price quoted is rarely the final price. Start by offering about half the asking price and work your way to a mutually agreeable amount. However, in modern shops, boutiques, and malls, prices are fixed.</p>`,
+                        'National Pride': `<p>Turks are very proud of their country and its history. Be extremely respectful of Mustafa Kemal Atatürk, the founder of the modern Turkish Republic. Insulting him or the Turkish flag is illegal and deeply offensive. Avoid making critical comments about the government or sensitive political topics unless you are in a trusted, private setting.</p>`,
+                        'Cultural Tips': `<ul><li>Avoid public displays of affection; they are generally frowned upon.</li><li>During the holy month of Ramadan, be considerate of those who are fasting and avoid eating, drinking, or smoking openly on the street during the day in more conservative areas.</li><li><strong>Helpful Phrase:</strong> "Kolay gelsin" (May it come easy) - A wonderful phrase to say to anyone who is working, from a shopkeeper to a cleaner. It is highly appreciated.</li></ul>`,
+                    }
+                },
+                'Australia': {
+                    title: 'Civic Sense in Australia',
+                    content: {
+                        'Greetings & Mateship': `<p>Australian culture is famously informal and laid-back. A simple "G'day" or "How are you going?" is a standard greeting. First names are used almost immediately, regardless of age or status. <strong>Mateship is a core cultural value,</strong> signifying loyalty, equality, and friendship. While a handshake is appropriate for a first or formal meeting, a casual nod or wave is more common. Don't be surprised by a friendly and direct communication style.</p>`,
+                        'Pub & BBQ Etiquette': `<p>The pub is a central hub for socializing. Like in the UK, you order and pay at the bar. The "shout" system is crucial: if you are with a group, you are expected to take your turn buying a "round" of drinks for everyone. It is considered rude to leave before it's your turn to shout. At a BBQ or "barbie," it is very common to be asked to <strong>"bring a plate,"</strong> which means bringing a dish to share (like a salad or dessert). Often, invitations will also be "BYO" (Bring Your Own), meaning you should bring your own alcoholic beverages.</p>`,
+                        'Public Conduct': `<p>Like the British, Australians are strict about queuing. Always wait your turn in line. Politeness is valued, so "please" and "thank you" are essential. Thanking the bus driver when you get off is a common courtesy. Littering is highly frowned upon. Australians have a unique slang, and while you don't need to use it, understanding terms like "arvo" (afternoon) or "brekkie" (breakfast) can be helpful.</p>`,
+                        'Tipping Culture': `<p><strong>Tipping is not a standard practice in Australia.</strong> Minimum wages are high, so service staff do not rely on tips for their income. It is entirely optional. For exceptional service in a high-end restaurant, you might round up the bill or leave about 10%, but it is not expected. You do not tip bartenders, taxi drivers, or hotel staff.</p>`,
+                        'Beach Safety': `<p>Beach culture is integral to the Australian lifestyle, but it comes with important safety rules. Always <strong>"swim between the flags."</strong> These red and yellow flags mark the safest area of the beach patrolled by lifeguards ("lifesavers"). Swimming outside these areas can be extremely dangerous due to strong currents known as rips. Heed all warning signs and instructions from lifeguards.</p>`,
+                        'Cultural Context': `<ul><li><strong>Egalitarianism:</strong> Australians have a strong belief in a "fair go" (a fair chance) for everyone and a general dislike for authority and pretentiousness.</li><li><strong>Sense of Humour:</strong> The humour is often dry, ironic, and self-deprecating. "Taking the piss" (teasing someone light-heartedly) is a common form of affection between friends.</li><li><strong>Helpful Phrase:</strong> "No worries." This is a quintessential Australian phrase used for "you're welcome," "it's okay," or "don't worry about it."</li></ul>`,
+                    }
+                },
+                'United Kingdom': {
+                    title: 'Civic Sense in the UK',
+                    content: {
+                        'The Art of Queuing': `<p>The queue (or "line") is a sacred institution in the UK. <strong>Jumping a queue is one of the biggest social faux pas you can commit.</strong> It is seen as fundamentally unfair. Whether it's for a bus, at a shop checkout, or in a post office, always find the back of the queue and wait your turn patiently. Even when there isn't a formal line, there's often an unspoken understanding of who is next.</p>`,
+                        'Pub Etiquette': `<p>Pubs (Public Houses) are central to British social life. Table service is rare; you are expected to <strong>go to the bar to order your drinks and food.</strong> Find a table first, note the table number if you're ordering food, then go to the bar. When you are with a group, it is customary to buy drinks in "rounds," where each person takes a turn buying drinks for the entire group. It's considered impolite to opt out of a round if you're staying with the group. Tipping is not required at the bar, but for good table service, 10-12% is standard if a service charge isn't already included.</p>`,
+                        'Politeness & Understatement': `<p>The British are masters of understatement and often have a dry, sarcastic sense of humor that can be misinterpreted. "Not bad" can mean "very good," and "I'll bear it in mind" might mean "I have no intention of doing that." <strong>Politeness is paramount.</strong> "Please," "thank you," and especially "sorry" are used constantly. People will say "sorry" reflexively if you bump into them, even if it was your fault.</p>`,
+                        'Social Interaction': `<p>Talking about the weather is a classic icebreaker and a safe, neutral topic for small talk. The British can be more reserved than Americans and may perceive over-friendliness from a stranger as suspicious. Avoid asking personal questions about salary, wealth, or political affiliation. A friendly nod is a common acknowledgment to strangers. Don't be offended by a lack of overt enthusiasm; it's often just cultural reserve.</p>`,
+                        'Transportation Etiquette': `<p>On the London Underground ("the Tube"), there are strict rules. Stand on the right on escalators. Let people off the train before you get on. Do not make eye contact with fellow passengers. On buses outside of London, it's common to thank the driver when you get off.</p>`,
+                        'Cultural Context': `<ul><li><strong>Class System:</strong> While less rigid than in the past, a subtle class awareness still exists and can be reflected in accents, education, and manners. It's a complex and sensitive topic.</li><li><strong>"Cheers":</strong> This is a versatile word that can mean "thank you," "goodbye," or be used as a toast.</li><li><strong>Helpful Phrase:</strong> "Are you alright?" or just "Alright?" is a common, informal greeting, equivalent to "How are you?". The expected answer is "Yeah, you?" or simply "Alright."</li></ul>`,
+                    }
+                }
+            };
+            const quizData = {
+                'France': [
+                    { q: 'When entering a shop in France, what is the most essential word to say?', a: 'Bonjour', o: ['Excusez-moi', 'Merci', 'Salut'] },
+                    { q: 'In a French dining context, where should you place your bread?', a: 'On the tablecloth next to your plate', o: ['On your plate', 'In the bread basket', 'On your napkin'] },
+                    { q: 'What does the term "service compris" on a French bill mean?', a: 'The service charge is included', o: ['Service is not included', 'Service is optional', 'The best service is guaranteed'] },
+                    { q: 'When using an escalator in Paris, which side should you stand on to be still?', a: 'Right', o: ['Left', 'Middle', 'It does not matter'] },
+                    { q: 'As a tourist, which form of "you" should you use when addressing a stranger?', a: 'Vous', o: ['Tu', 'Toi', 'Votre'] },
+                    { q: 'It is considered rude to do what on public transport in France?', a: 'Speak loudly on your phone', o: ['Read a book', 'Listen to music with headphones', 'Offer your seat to an elderly person'] },
+                    { q: 'What should you wait for your host to say before starting to eat?', a: 'Bon appétit', o: ['Bon voyage', 'Bonsoir', 'À votre santé'] },
+                    { q: 'In France, a "café" typically refers to what?', a: 'An espresso', o: ['A large milky coffee', 'A coffee with cream', 'An iced coffee'] },
+                    { q: 'How should you get a waiter\'s attention in France?', a: 'By making eye contact and a slight nod', o: ['By snapping your fingers', 'By shouting "Garçon!"', 'By waving your hand vigorously'] },
+                    { q: 'When leaving a shop, what is the polite phrase to use?', a: 'Au revoir', o: ['Bonjour', 'Merci', 'Adieu'] },
+                    { q: 'What is a common mistake tourists make regarding dining times?', a: 'Trying to eat dinner at 6 PM', o: ['Eating a large lunch', 'Skipping the cheese course', 'Ordering wine with a meal'] },
+                    { q: 'How are greetings between friends who are women typically exchanged?', a: 'A kiss on each cheek ("la bise")', o: ['A firm handshake', 'A formal bow', 'A hug'] },
+                    { q: 'What is the general attitude towards public displays of wealth?', a: 'It is generally considered tasteless', o: ['It is encouraged', 'It is a sign of success', 'It is very common'] },
+                    { q: 'The French value logic and reason in conversation. This is known as...', a: 'Cartesian logic', o: ['Socratic method', 'Existentialism', 'Romanticism'] },
+                    { q: 'If a bill is 18€, what is an acceptable but not obligatory extra tip?', a: '1-2€', o: ['5€', '10€', 'Nothing, it\'s an insult'] },
+                ],
+                'Spain': [
+                    { q: 'What is the typical time for Spaniards to eat their evening meal ("la cena")?', a: '9 PM or later', o: ['6 PM', '7 PM', '8 PM'] },
+                    { q: 'What does "dos besos" refer to in Spain?', a: 'A greeting of two kisses on the cheeks', o: ['A type of tapas', 'A flamenco dance step', 'A famous Spanish wine'] },
+                    { q: 'The afternoon break where many shops close is known as the...', a: 'Siesta', o: ['Fiesta', 'Pausa', 'Descanso'] },
+                    { q: 'When greeting someone with "dos besos", which cheek do you typically start with?', a: 'Right', o: ['Left', 'It varies by region', 'Forehead'] },
+                    { q: 'How is tipping generally regarded in Spanish restaurants?', a: 'Appreciated but not obligatory', o: ['Mandatory (15-20%)', 'Considered rude', 'Included by law'] },
+                    { q: 'What is a common way to eat tapas?', a: 'Standing at the bar', o: ['Seated at a formal table', 'As a takeaway meal', 'Only during festivals'] },
+                    { q: 'If someone is speaking loudly and with many gestures, it usually means they are...', a: 'Having a normal, expressive conversation', o: ['Very angry', 'A tourist', 'Trying to be rude'] },
+                    { q: 'What is "la cuenta, por favor"?', a: 'A request for the bill', o: ['A common greeting', 'Ordering a coffee', 'Asking for the menu'] },
+                    { q: 'In Spain, it\'s common to throw napkins or food debris on the floor in which type of establishment?', a: 'Some traditional tapas bars', o: ['Fine dining restaurants', 'All cafes and bars', 'This is never acceptable'] },
+                    { q: 'Punctuality for a social dinner party means it is acceptable to arrive...', a: '15 minutes late', o: ['Exactly on time', '30 minutes early', 'An hour late'] },
+                    { q: 'What is the main meal of the day in Spain?', a: 'Lunch (la comida)', o: ['Breakfast (el desayuno)', 'Dinner (la cena)', 'Brunch'] },
+                    { q: 'When addressing a new acquaintance who is older than you, it is best to use...', a: 'The formal "usted"', o: ['The informal "tú"', 'Their first name', 'A nickname'] },
+                    { q: 'Which of the following is considered bad luck in Spain?', a: 'Putting a hat on a bed', o: ['Opening an umbrella indoors', 'Walking under a ladder', 'Spilling salt'] },
+                    { q: 'The late-night party culture in Spain is known as the...', a: 'Marcha', o: ['Paseo', 'Copa', 'Noche'] },
+                    { q: 'What is a "sobremesa"?', a: 'The time spent relaxing and chatting at the table after a meal', o: ['A type of dessert', 'The tablecloth', 'A specific appetizer'] },
+                ],
+                'United States': [
+                    { q: 'What is the standard tip for a waiter in a US restaurant?', a: '15-20%', o: ['5-10%', 'A few dollars', 'It is not necessary'] },
+                    { q: 'What is the most common form of greeting in a professional setting?', a: 'A firm handshake with eye contact', o: ['A hug', 'A nod', 'A kiss on the cheek'] },
+                    { q: 'What does "cutting in line" mean?', a: 'Going ahead of others who are waiting', o: ['Leaving the line early', 'Joining the end of the line', 'Letting someone else go first'] },
+                    { q: 'How much personal space do Americans typically prefer during conversation?', a: 'About an arm\'s length', o: ['Very close', 'Several feet', 'It does not matter'] },
+                    { q: 'Small talk with strangers is generally considered...', a: 'Friendly and normal', o: ['Rude and intrusive', 'Unusual', 'Only for business'] },
+                    { q: 'In the US, being on time for an appointment is...', a: 'Expected and important', o: ['Optional', 'Considered rude', 'A sign of being too eager'] },
+                    { q: 'If a bartender makes you a drink, what is a customary tip?', a: '$1-2 per drink', o: ['Nothing', '10% of the drink cost', 'A compliment'] },
+                    { q: 'What does the phrase "what\'s up?" usually mean?', a: 'A casual "hello, how are you?"', o: ['A literal question about what is above you', 'A sign of aggression', 'A request for help'] },
+                    { q: 'When invited to someone\'s home for dinner, it is polite to...', a: 'Bring a small gift, like wine or dessert', o: ['Arrive empty-handed', 'Arrive very early', 'Bring your own food'] },
+                    { q: 'In American business culture, communication is typically...', a: 'Direct and to the point', o: ['Indirect and subtle', 'Hierarchical', 'Very formal'] },
+                    { q: 'At a grocery store, who usually packs your bags?', a: 'The cashier or a designated bagger', o: ['You are expected to pack them yourself', 'The person behind you in line', 'You have to pay extra for bagging'] },
+                    { q: 'The price you see on a sales tag is usually...', a: 'Before sales tax is added', o: ['The final price you will pay', 'Inclusive of a service charge', 'A suggested price for bargaining'] },
+                    { q: 'If someone compliments your shirt, how should you respond?', a: 'Say "Thank you"', o: ['Deny the compliment', 'Tell them it was cheap', 'Ask why they like it'] },
+                    { q: 'When driving, honking your car horn is generally used for...', a: 'Warning of danger only', o: ['Greeting friends', 'Saying thank you', 'Expressing general frustration'] },
+                    { q: 'What does "BYOB" on an invitation mean?', a: 'Bring Your Own Beverage', o: ['Be Your Own Boss', 'Bring Your Own Buddy', 'Be Right Over, Buddy'] },
+                ],
+                'China': [
+                    { q: 'What is a major social taboo regarding chopsticks?', a: 'Sticking them upright in a rice bowl', o: ['Using them to eat noodles', 'Picking up a single grain of rice', 'Sharing them with a friend'] },
+                    { q: 'How should you give or receive a business card?', a: 'With both hands', o: ['With your right hand only', 'With your left hand only', 'Tossed casually across the table'] },
+                    { q: 'The concept of saving "face" means you should avoid...', a: 'Publicly embarrassing someone', o: ['Giving compliments', 'Accepting gifts', 'Making eye contact'] },
+                    { q: 'How can you non-verbally thank someone for pouring you tea?', a: 'By tapping two fingers on the table', o: ['By bowing your head', 'By giving a thumbs up', 'By clinking their cup'] },
+                    { q: 'If you give a gift and it is refused, you should...', a: 'Offer it again politely', o: ['Take it back immediately', 'Leave it on the table', 'Apologize for the gift'] },
+                    { q: 'When is it appropriate to open a gift you have received?', a: 'In private, after the giver has left', o: ['Immediately upon receiving it', 'Only after you give a gift in return', 'You should ask for permission first'] },
+                    { q: 'At a banquet, when should the guest of honor begin eating?', a: 'After the host has started or invited them to', o: ['Immediately when the food arrives', 'After everyone else has been served', 'After making a long speech'] },
+                    { q: 'Finishing all the food on your plate can sometimes imply...', a: 'That the host did not provide enough food', o: ['That you greatly enjoyed the meal', 'That you are a person of high status', 'That you are still hungry'] },
+                    { q: 'What is the significance of the color red in Chinese culture?', a: 'Luck, happiness, and prosperity', o: ['Mourning and sadness', 'Purity and innocence', 'Wealth and power'] },
+                    { q: 'When taking a photo with a group of people, who usually stands in the center?', a: 'The most senior or respected person', o: ['The youngest person', 'The host', 'The tallest person'] },
+                    { q: 'What does the number 4 sound similar to and is often considered unlucky?', a: 'Death', o: ['Wealth', 'Love', 'Food'] },
+                    { q: 'Directly saying "no" to a request can be seen as...', a: 'Confrontational and impolite', o: ['Honest and efficient', 'A normal part of negotiation', 'A sign of strength'] },
+                    { q: 'The concept of "guanxi" refers to...', a: 'The network of personal relationships and influence', o: ['A type of martial art', 'A traditional form of calligraphy', 'A regional cuisine'] },
+                    { q: 'When toasting, your glass should be...', a: 'Slightly lower than those of people senior to you', o: ['Higher than everyone else\'s', 'At the exact same level', 'Touched to your forehead before drinking'] },
+                    { q: 'Pointing with your index finger is considered rude. You should use...', a: 'Your whole open hand', o: ['Your thumb', 'Your chin', 'Your middle finger'] },
+                ],
+                'Italy': [
+                    { q: 'When should you order a cappuccino in Italy?', a: 'In the morning, for breakfast', o: ['After dinner as a dessert', 'At any time of the day', 'With your lunch'] },
+                    { q: 'What is the proper dress code for entering a major church like St. Peter\'s Basilica?', a: 'Shoulders and knees must be covered', o: ['Formal wear like a suit or dress', 'Casual beachwear is acceptable', 'There is no dress code'] },
+                    { q: 'The informal greeting "Ciao" is best used with...', a: 'Friends and young people', o: ['Shopkeepers and elderly people', 'Business colleagues', 'Everyone'] },
+                    { q: 'If you drink coffee standing at the bar ("al banco"), the price will likely be...', a: 'Cheaper than sitting at a table', o: ['More expensive than sitting', 'The same price as sitting', 'Free with a pastry'] },
+                    { q: 'What is a major culinary faux pas involving seafood pasta?', a: 'Asking for grated cheese on top', o: ['Eating it with a spoon and fork', 'Ordering it for dinner', 'Pairing it with white wine'] },
+                    { q: 'In social situations in southern Italy, being 15-30 minutes late is often...', a: 'Considered normal and acceptable', o: ['Extremely rude', 'A sign you are not coming', 'Only acceptable for women'] },
+                    { q: 'What is a "primo" in a traditional Italian meal structure?', a: 'The first course, usually pasta or risotto', o: ['The appetizer course', 'The main meat or fish course', 'The dessert'] },
+                    { q: 'How do you get a waiter\'s attention?', a: 'By making eye contact and saying "Senta"', o: ['By shouting "Cameriere!"', 'By snapping your fingers', 'By waving your napkin'] },
+                    { q: 'The "coperto" charge on a bill is for...', a: 'The cover charge for bread and your place setting', o: ['The waiter\'s tip', 'A local tourist tax', 'Filtered water'] },
+                    { q: 'When talking, Italians are known for using...', a: 'A lot of hand gestures', o: ['A very quiet, monotone voice', 'Minimal eye contact', 'Very few facial expressions'] },
+                    { q: 'What is a "passeggiata"?', a: 'A leisurely evening stroll', o: ['A type of fresh pasta', 'A fast train', 'A public holiday'] },
+                    { q: 'To use a more formal greeting than "Ciao", you would say...', a: 'Buongiorno or Buonasera', o: ['Salute', 'Pronto', 'Arrivederci'] },
+                    { q: 'What is "Ferragosto"?', a: 'A major public holiday on August 15th', o: ['The Italian word for February', 'A famous brand of car', 'A type of cheese'] },
+                    { q: 'When you are invited to an Italian home for dinner, you should...', a: 'Bring a gift like good pastries or wine', o: ['Eat a large meal beforehand', 'Never bring anything', 'Arrive an hour early to help'] },
+                    { q: 'Italians typically eat dinner around what time?', a: '8:00 PM or later', o: ['6:00 PM', '5:30 PM', '7:00 PM'] },
+                ],
+                'Turkey': [
+                    { q: 'How do you traditionally show respect when greeting an elder?', a: 'Kiss their right hand and bring it to your forehead', o: ['Give them a firm handshake', 'Bow deeply', 'Give them a hug'] },
+                    { q: 'What must you do before entering a mosque?', a: 'Remove your shoes', o: ['Wash your hands and face', 'Make a small donation', 'Cover your face completely'] },
+                    { q: 'A single upward tilt of the head accompanied by a "tsk" sound means...', a: 'No', o: ['Yes', 'I don\'t understand', 'Thank you'] },
+                    { q: 'If a shopkeeper offers you a glass of tea, it is most polite to...', a: 'Accept it and take a few sips', o: ['Politely refuse', 'Offer to pay for it', 'Ignore the offer'] },
+                    { q: 'Which of these hand gestures is considered very offensive in Turkey?', a: 'The "OK" sign (thumb and index finger circle)', o: ['A thumbs-up', 'A wave', 'A high-five'] },
+                    { q: 'When bargaining in a market, the initial price offered is usually...', a: 'A starting point for negotiation', o: ['The final, fixed price', 'A special discount for tourists', 'A mistake'] },
+                    { q: 'In Turkish homes, it is customary to...', a: 'Take off your shoes upon entering', o: ['Keep your shoes on', 'Wait to be told what to do', 'Wear special house slippers you bring'] },
+                    { q: 'What is "Nazar Boncuğu"?', a: 'A blue eye-shaped amulet to ward off evil', o: ['A type of sweet pastry', 'A traditional Turkish carpet', 'A famous historical site'] },
+                    { q: 'When addressing a man slightly older than you, you can respectfully call him...', a: 'Abi (older brother)', o: ['Bey (Mr.)', 'Efendim (Sir)', 'Amca (uncle)'] },
+                    { q: 'Pointing at someone with your index finger is considered...', a: 'Rude', o: ['A friendly gesture', 'Acceptable', 'A way of showing respect'] },
+                    { q: 'During the holy month of Ramadan, you should...', a: 'Avoid eating or drinking in public during fasting hours', o: ['Eat more in public to show support', 'Offer food to fasting locals', 'Ignore it as it does not apply to tourists'] },
+                    { q: 'What is a "hamam"?', a: 'A traditional Turkish bath', o: ['A type of kebab', 'A public square', 'A musical instrument'] },
+                    { q: 'When passing something to someone, it is best to use...', a: 'Your right hand or both hands', o: ['Your left hand only', 'Your foot', 'Your index finger'] },
+                    { q: 'Turkish coffee is known for being...', a: 'Strong, thick, and served with grounds at the bottom', o: ['Weak and milky', 'Instant coffee', 'Served with ice'] },
+                    { q: 'Splitting the bill ("German style") in a restaurant is...', a: 'Not very common; usually one person pays', o: ['The standard way to pay', 'Done only by tourists', 'Considered rude'] },
+                ],
+                'Australia': [
+                    { q: 'If you are invited to an Australian BBQ and asked to "bring a plate", what should you bring?', a: 'A dish to share, like a salad or dessert', o: ['An empty plate for yourself', 'Money for the food', 'Your own cutlery'] },
+                    { q: 'In a pub, if your friend says "it\'s my shout", what do they mean?', a: 'It\'s their turn to buy a round of drinks', o: ['They are shouting at the bartender', 'They are ready to leave', 'They want you to be quiet'] },
+                    { q: 'What is the general rule for tipping in Australia?', a: 'It is not expected but appreciated for exceptional service', o: ['A 15-20% tip is mandatory', 'Tipping is considered rude', 'You should only tip in cash'] },
+                    { q: 'The red and yellow flags on an Australian beach signify...', a: 'The safest area to swim, patrolled by lifeguards', o: ['A surfing competition is in progress', 'The water is too cold for swimming', 'A warning for sharks'] },
+                    { q: 'Which side of the road do Australians drive on?', a: 'Left', o: ['Right', 'Either side is acceptable', 'The middle'] },
+                    { q: 'An invitation that says "BYO" means you should...', a: 'Bring Your Own drinks', o: ['Bring Your Own chair', 'Be an official guest', 'Reply by a certain date'] },
+                    { q: 'What does the common slang term "arvo" mean?', a: 'Afternoon', o: ['Avocado', 'Arrival', 'Argument'] },
+                    { q: 'A friendly wave from another driver often means what?', a: 'Thank you', o: ['Hello', 'You are driving too fast', 'There is a police car ahead'] },
+                    { q: 'The Australian cultural value of "mateship" is about...', a: 'Loyalty and friendship', o: ['Finding a romantic partner', 'Competing with your friends', 'Business partnerships'] },
+                    { q: 'When meeting an Australian for the first time in a non-formal setting, you should address them by their...', a: 'First name', o: ['Full name', 'Title and last name', 'Nickname'] },
+                    { q: 'What is the most important rule when in a queue (line)?', a: 'Do not push in front of others', o: ['Save a spot for your friends', 'Talk to the person in front of you', 'Stand as close as possible to the person in front'] },
+                    { q: 'The term "taking the piss" refers to what social interaction?', a: 'Teasing someone in a friendly, joking manner', o: ['Stealing from someone', 'Being extremely rude', 'Complaining about work'] },
+                    { q: 'What is the quintessential Australian phrase for "you\'re welcome" or "it\'s okay"?', a: 'No worries', o: ['Right then', 'Good on ya', 'Fair enough'] },
+                    { q: 'Thanking the bus driver when you get off is considered...', a: 'A common and polite courtesy', o: ['Unnecessary and weird', 'Only for children', 'A legal requirement'] },
+                    { q: 'What does the Australian belief in a "fair go" mean?', a: 'Everyone deserves an equal chance to succeed', o: ['You must always play fairly in sports', 'The government is always fair', 'Going to the fairground'] }
+                ],
+                'United Kingdom': [
+                    { q: 'What is considered a major social sin in the UK?', a: 'Jumping the queue (cutting in line)', o: ['Talking about the weather', 'Being overly polite', 'Drinking tea in the afternoon'] },
+                    { q: 'In a pub, how do you typically get a drink?', a: 'Order and pay at the bar', o: ['Wait for a server at your table', 'Use a mobile app', 'Ask the person next to you'] },
+                    { q: 'If a British person says your idea is "not bad," they likely mean...', a: 'It\'s very good', o: ['It\'s terrible', 'They are not interested', 'It is mediocre'] },
+                    { q: 'What is the custom of buying "rounds" in a pub?', a: 'Each person takes a turn buying drinks for the group', o: ['Everyone buys their own drink', 'The richest person pays for everything', 'The drinks are all circular'] },
+                    { q: 'Which word are you likely to hear frequently, even if no one is at fault?', a: 'Sorry', o: ['Excellent', 'Awesome', 'Whatever'] },
+                    { q: 'When driving, a flash of the headlights from another driver often means...', a: '"Go ahead" or "Thank you"', o: ['"Speed up"', '"Slow down"', '"Danger ahead"'] },
+                    { q: 'What is a common, safe topic of conversation with a stranger?', a: 'The weather', o: ['How much money you earn', 'Your political views', 'Personal family problems'] },
+                    { q: 'Tipping in a restaurant with service included is...', a: 'Not necessary, but a small extra tip is appreciated', o: ['Mandatory', 'Considered an insult', 'Illegal'] },
+                    { q: 'What does "cheers" mean in a non-drinking context?', a: 'Thank you', o: ['Hello', 'Goodbye', 'Both thank you and goodbye'] },
+                    { q: 'If you are invited to someone\'s home for dinner, you should aim to arrive...', a: 'On time or a few minutes late', o: ['30 minutes early', 'An hour late', 'Exactly on the dot'] },
+                    { q: 'A "biscuit" in the UK is what Americans would call a...', a: 'Cookie', o: ['Scone', 'Cracker', 'Muffin'] },
+                    { q: 'What is "pantomime"?', a: 'A traditional, comedic Christmas play', o: ['A form of silent acting', 'A type of poetry', 'A political debate'] },
+                    { q: 'When using public transport, it is considered polite to...', a: 'Keep your music and conversations quiet', o: ['Talk to the driver while they are driving', 'Put your feet on the seats', 'Eat hot, smelly food'] },
+                    { q: 'The "V-sign" with the palm facing inward is...', a: 'A very rude and offensive gesture', o: ['A sign for peace', 'A way of ordering two drinks', 'A symbol of victory'] },
+                    { q: 'What does it mean if someone offers you "a cuppa"?', a: 'A cup of tea', o: ['A cup of coffee', 'A beer', 'A bowl of soup'] },
+                ]
+            };
+
+
+            let state = {
+                currentScreen: 'home-screen',
+                selectedCountry: null,
+                score: 0,
+                currentQuestionIndex: 0,
+                shuffledQuestions: [],
+            };
+
+            const screens = document.querySelectorAll('.screen');
+            const startBtn = document.getElementById('start-btn');
+            const homeBtn = document.getElementById('home-btn');
+            const countryButtonsContainer = document.getElementById('country-buttons');
+            const backToCountriesBtn = document.getElementById('back-to-countries-btn');
+            const startCountryQuizBtn = document.getElementById('start-country-quiz-btn');
+            const nextQuestionBtn = document.getElementById('next-question-btn');
+            const restartQuizBtn = document.getElementById('restart-quiz-btn');
+            const backToSelectionBtn = document.getElementById('back-to-selection-btn');
+
+
+            function switchScreen(screenId) {
+                state.currentScreen = screenId;
+                screens.forEach(screen => {
+                    screen.classList.toggle('active', screen.id === screenId);
+                });
+                
+                if(screenId !== 'home-screen') {
+                    homeBtn.classList.remove('hidden');
+                } else {
+                    homeBtn.classList.add('hidden');
+                }
+                
+                window.scrollTo(0, 0);
+            }
+
+            function initializeCountryButtons() {
+                countryButtonsContainer.innerHTML = '';
+                Object.keys(detailedCivicData).forEach(countryName => {
+                    const card = document.createElement('div');
+                    card.className = 'country-card';
+                    card.innerHTML = `${countryLogos[countryName] || ''}<span>${countryName}</span>`;
+                    card.addEventListener('click', () => {
+                        state.selectedCountry = countryName;
+                        displayGuidance(detailedCivicData[countryName]);
+                        switchScreen('guidance-screen');
+                    });
+                    countryButtonsContainer.appendChild(card);
+                });
+            }
+            
+            function displayGuidance(data) {
+                document.getElementById('guidance-title').textContent = data.title;
+                const navContainer = document.getElementById('guidance-nav');
+                const contentContainer = document.getElementById('guidance-content');
+                navContainer.innerHTML = '';
+                
+                const topics = Object.keys(data.content);
+                topics.forEach((topic, index) => {
+                    const button = document.createElement('button');
+                    button.textContent = topic;
+                    button.addEventListener('click', (e) => {
+                        contentContainer.innerHTML = `<h3>${topic}</h3>${data.content[topic]}`;
+                        contentContainer.scrollTop = 0; 
+                        navContainer.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+                        e.target.classList.add('active');
+                    });
+                    navContainer.appendChild(button);
+
+                    if (index === 0) {
+                        button.classList.add('active');
+                        contentContainer.innerHTML = `<h3>${topic}</h3>${data.content[topic]}`;
+                    }
+                });
+            }
+
+            function startQuiz(countryName) {
+                state.score = 0;
+                state.currentQuestionIndex = 0;
+                state.shuffledQuestions = shuffleArray([...quizData[countryName]]);
+                document.getElementById('quiz-title').textContent = `${countryName}: Civic Sense Quiz`;
+                displayQuestion();
+                switchScreen('quiz-screen');
+            }
+
+            function displayQuestion() {
+                const questionNumberEl = document.getElementById('question-number');
+                const scoreEl = document.getElementById('score');
+                const progressBarEl = document.getElementById('progress-bar');
+                const questionTextEl = document.getElementById('question-text');
+                const optionsContainer = document.getElementById('options-container');
+
+                if (state.currentQuestionIndex >= state.shuffledQuestions.length) {
+                    showResults();
+                    return;
+                }
+
+                const question = state.shuffledQuestions[state.currentQuestionIndex];
+                const options = shuffleArray([question.a, ...question.o]);
+                const progress = ((state.currentQuestionIndex) / state.shuffledQuestions.length) * 100;
+
+                questionNumberEl.textContent = state.currentQuestionIndex + 1;
+                scoreEl.textContent = state.score;
+                progressBarEl.style.width = `${progress}%`;
+                questionTextEl.textContent = question.q;
+                
+                optionsContainer.innerHTML = '';
+                options.forEach(optionText => {
+                    const button = document.createElement('button');
+                    button.className = 'btn option-btn';
+                    button.textContent = optionText;
+                    button.addEventListener('click', () => checkAnswer(optionText, button));
+                    optionsContainer.appendChild(button);
+                });
+                
+                document.getElementById('feedback-text').textContent = '';
+                nextQuestionBtn.classList.add('hidden');
+            }
+
+            function checkAnswer(selectedAnswer, selectedButton) {
+                const question = state.shuffledQuestions[state.currentQuestionIndex];
+                const correct = selectedAnswer === question.a;
+                const feedbackText = document.getElementById('feedback-text');
+
+                document.querySelectorAll('.option-btn').forEach(btn => {
+                    btn.disabled = true;
+                    if (btn.textContent === question.a) {
+                        btn.classList.add('correct');
+                    }
+                });
+
+                if (correct) {
+                    state.score++;
+                    selectedButton.classList.add('correct');
+                    feedbackText.textContent = 'Correct!';
+                    feedbackText.className = 'text-center mt-4 font-medium h-6 text-green-600';
+                } else {
+                    selectedButton.classList.add('incorrect');
+                    feedbackText.textContent = `Correct answer: ${question.a}`;
+                    feedbackText.className = 'text-center mt-4 font-medium h-6 text-red-600';
+                }
+                
+                document.getElementById('score').textContent = state.score;
+                nextQuestionBtn.classList.remove('hidden');
+            }
+            
+            function handleNextQuestion() {
+                state.currentQuestionIndex++;
+                if (state.currentQuestionIndex < state.shuffledQuestions.length) {
+                    displayQuestion();
+                } else {
+                    showResults();
+                }
+            }
+
+            function showResults() {
+                const score = state.score;
+                const total = state.shuffledQuestions.length;
+                const percentage = Math.round((score / total) * 100);
+                document.getElementById('final-score').textContent = `${percentage}%`;
+                document.getElementById('results-quiz-title').textContent = `Your result for the ${state.selectedCountry} quiz`;
+
+                let message = '';
+                if (percentage >= 90) message = "Outstanding! You're a true global citizen.";
+                else if (percentage >= 70) message = "Great job! You have a solid understanding of local etiquette.";
+                else if (percentage >= 50) message = "Good effort! A little more study and you'll be an expert.";
+                else message = "Keep learning! The world of travel etiquette is fascinating.";
+                
+                document.getElementById('result-message').textContent = message;
+                document.getElementById('progress-bar').style.width = '100%';
+                switchScreen('results-screen');
+            }
+
+            function shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            }
+
+            startBtn.addEventListener('click', () => switchScreen('country-selection-screen'));
+            homeBtn.addEventListener('click', () => switchScreen('home-screen'));
+            backToCountriesBtn.addEventListener('click', () => switchScreen('country-selection-screen'));
+            startCountryQuizBtn.addEventListener('click', () => {
+                if(state.selectedCountry) {
+                    startQuiz(state.selectedCountry);
+                }
+            });
+            nextQuestionBtn.addEventListener('click', handleNextQuestion);
+            restartQuizBtn.addEventListener('click', () => {
+                 if(state.selectedCountry) {
+                    startQuiz(state.selectedCountry);
+                }
+            });
+            backToSelectionBtn.addEventListener('click', () => switchScreen('country-selection-screen'));
+            
+            initializeCountryButtons();
+        });
+    </script>
+</body>
+</html>
