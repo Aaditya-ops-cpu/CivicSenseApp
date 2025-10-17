@@ -12,8 +12,6 @@ This application was created to be a simple, accessible, and user-friendly tool 
 
 The entire application is built as a single-page web app, making it fast, lightweight, and easy to run on any device with a web browser.
 
-![Home Page Screenshot](https://i.imgur.com/8a6Q4k8.png)
-
 ---
 
 ## Key Features
