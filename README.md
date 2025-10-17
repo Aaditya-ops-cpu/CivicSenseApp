@@ -2,7 +2,7 @@
 
 Welcome to the Global Citizen Guide & Quiz, a web application designed to help travelers understand and respect the local customs and civic sense of various countries around the world. Travel with confidence by learning local etiquette and then testing your knowledge with our interactive quizzes.
 
-**Live Demo:** **[https://aaditya-ops-cpu.github.io/CivicSenseApp/](https://aaditya-ops-cpu.github.io/CivicSenseApp/)**
+[![Live Demo](https://img.shields.io/badge/Live-Demo-blue.svg)](https://aaditya-ops-cpu.github.io/CivicSenseApp/)
 
 ---
 
